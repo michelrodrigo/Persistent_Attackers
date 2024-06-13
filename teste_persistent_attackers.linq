@@ -20,8 +20,23 @@ public static void Main()
 {
 	var s = Enumerable.Range(0, 6).Select(i => new State($"s{i}", i == 0 ? Marking.Marked : Marking.Unmarked)).ToArray();
 	//var e = Enumerable.Range(0, 100).Select(i => new Event($"e{i}", i % 2 != 0 ? Controllability.Controllable : Controllability.Uncontrollable)).ToArray();
+	
+	DeterministicFiniteAutomaton.FromWmodFile("E:\\Dropbox\\Doutorado\\Plantas linqpad\\agv.wmod", out List<DeterministicFiniteAutomaton> plants, out List<DeterministicFiniteAutomaton> specs);
 
+	List<DeterministicFiniteAutomaton> T_specs = new List<DeterministicFiniteAutomaton>();
+	
+	foreach(var E in specs)
+	{
+		SpecificationEstimator(out var T_E, E, E.Events.Where(i => i.IsControllable).ToList(), E.Events.Where(i => !i.IsControllable).ToList());
+		T_specs.Add(T_E);
+	}
+	
+	DeterministicFiniteAutomaton.ToWmodFile("E:\\Dropbox\\Doutorado\\Plantas linqpad\\agv_pa.wmod", plants, T_specs);
+	
 
+	
+
+	/*
 	Event a1 = new Event("a1", Controllability.Controllable);
 	Event b1 = new Event("b1", Controllability.Uncontrollable);
 	Event a2 = new Event("a2", Controllability.Controllable);
@@ -62,12 +77,14 @@ public static void Main()
 	List<Event> EAuC = new List<Event>() { b1 };
 	
 	SpecificationEstimator(out var TE, E1, EAC, EAuC);
+	
 
 	ControllerEstimator(out var TG, G1);
 	//NetworkEstimator(out var TN, G1);
 
 	//var ThetaG = TG.ParallelCompositionWith(TN);
 	//ThetaG.ShowAutomaton("Theta");
+	*/
 
 	/*
 	TO DO:
@@ -77,30 +94,30 @@ public static void Main()
 	*/
 }
 
-static void SpecificationEstimator(out DeterministicFiniteAutomaton ThetaE, DeterministicFiniteAutomaton E, List<Event> EAC, List<Event> EAuC)
+static void SpecificationEstimator(out DeterministicFiniteAutomaton ThetaE, DeterministicFiniteAutomaton E, List<AbstractEvent> EAC, List<AbstractEvent> EAuC)
 {
 	//var events = new Ev //row: type of event; column: event
-	List<Event[]> events = new List<Event[]>();
+	List<AbstractEvent[]> events = new List<AbstractEvent[]>();
 
 	foreach(var e in EAC){
-			events.Add(new Event[]
+			events.Add(new AbstractEvent[]
 			{
 				e, 
-				new Event(string.Concat(e.Alias, "pC"), Controllability.Uncontrollable),
-				new Event(string.Concat(e.Alias, "mC"), Controllability.Uncontrollable),
-				new Event(string.Concat(e.Alias, "pN"), Controllability.Uncontrollable),
-				new Event(string.Concat(e.Alias, "mN"), Controllability.Uncontrollable)			
+				new AbstractEvent(string.Concat(e.ToString(), "pC"), Controllability.Uncontrollable),
+				new AbstractEvent(string.Concat(e.Alias, "mC"), Controllability.Uncontrollable),
+				new AbstractEvent(string.Concat(e.Alias, "pN"), Controllability.Uncontrollable),
+				new AbstractEvent(string.Concat(e.Alias, "mN"), Controllability.Uncontrollable)			
 			});
 			
 		}
 	foreach(var e in EAuC){
-		events.Add(new Event[]
+		events.Add(new AbstractEvent[]
 		{
 			e,
-			new Event(string.Concat(e.Alias, "pC"), Controllability.Uncontrollable),
-			new Event(string.Concat(e.Alias, "mC"), Controllability.Uncontrollable),
-			new Event(string.Concat(e.Alias, "pN"), Controllability.Uncontrollable),
-			new Event(string.Concat(e.Alias, "mN"), Controllability.Uncontrollable)
+			new AbstractEvent(string.Concat(e.Alias, "pC"), Controllability.Uncontrollable),
+			new AbstractEvent(string.Concat(e.Alias, "mC"), Controllability.Uncontrollable),
+			new AbstractEvent(string.Concat(e.Alias, "pN"), Controllability.Uncontrollable),
+			new AbstractEvent(string.Concat(e.Alias, "mN"), Controllability.Uncontrollable)
 		});
 
 	}
